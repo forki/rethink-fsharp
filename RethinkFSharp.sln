@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RethinkFSharp.Types", "src\RethinkFSharp.Types\RethinkFSharp.Types.fsproj", "{99E2BA88-20A8-4C91-8463-797A1744762D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RethinkFSharp", "src\RethinkFSharp\RethinkFSharp.fsproj", "{866CF358-C77B-4587-B654-A83CA56FC02D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RethinkFSharpTests", "test\RethinkFSharpTests\RethinkFSharpTests.fsproj", "{C5021C2B-F645-4B63-B7F9-BF9717E3A810}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Paket", "Paket", "{190DB1B8-2657-4A8A-AC8B-1D2B65D56FE4}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fake", "Fake", "{64F5E9E0-C45E-403B-821D-6CBFFEAE0D10}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		build.fsx = build.fsx
+		build.sh = build.sh
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99E2BA88-20A8-4C91-8463-797A1744762D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99E2BA88-20A8-4C91-8463-797A1744762D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99E2BA88-20A8-4C91-8463-797A1744762D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99E2BA88-20A8-4C91-8463-797A1744762D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{866CF358-C77B-4587-B654-A83CA56FC02D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{866CF358-C77B-4587-B654-A83CA56FC02D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{866CF358-C77B-4587-B654-A83CA56FC02D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{866CF358-C77B-4587-B654-A83CA56FC02D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5021C2B-F645-4B63-B7F9-BF9717E3A810}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5021C2B-F645-4B63-B7F9-BF9717E3A810}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5021C2B-F645-4B63-B7F9-BF9717E3A810}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5021C2B-F645-4B63-B7F9-BF9717E3A810}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
