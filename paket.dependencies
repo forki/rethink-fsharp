@@ -1,0 +1,10 @@
+group Build
+source https://nuget.org/api/v2
+
+nuget FAKE
+nuget xUnit.Runner.Console
+
+group Test
+source https://nuget.org/api/v2
+
+nuget FsUnit.xUnit
