@@ -9,6 +9,18 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RethinkFSharp", "src\Rethin
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RethinkFSharpTests", "test\RethinkFSharpTests\RethinkFSharpTests.fsproj", "{C5021C2B-F645-4B63-B7F9-BF9717E3A810}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Paket", "Paket", "{190DB1B8-2657-4A8A-AC8B-1D2B65D56FE4}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fake", "Fake", "{64F5E9E0-C45E-403B-821D-6CBFFEAE0D10}"
+	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
+		build.fsx = build.fsx
+		build.sh = build.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

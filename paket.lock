@@ -1,5 +1,8 @@
 
-
+GITHUB
+  remote: rethinkdb/rethinkdb
+  specs:
+    src/rdb_protocol/ql2.proto (c38d34a746b2d6618eb6a71692ecbd254d940072)
 GROUP Build
 NUGET
   remote: https://www.nuget.org/api/v2
