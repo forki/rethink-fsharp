@@ -6,3 +6,4 @@ obj/
 .fake/
 paket-files/
 build/
+*.user
