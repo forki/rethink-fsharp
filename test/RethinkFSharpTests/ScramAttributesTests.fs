@@ -24,7 +24,7 @@ let private scramAttributes =
 let ``a client first message should always start with n,,``() =
     let firstMessage = Scram.clientFirstMessage scramAttributes
     
-    firstMessage.Substring(0, 3) |> should equal "n,,"
+    firstMessage.Substring (0, 3) |> should equal "n,,"
 
 [<Fact>]
 let ``a client first message should contain a username, followed by a nonce``() =
@@ -35,7 +35,7 @@ let ``a client first message should contain a username, followed by a nonce``() 
 
     let expectedFirstMessage = sprintf "u=%s,r=%s" username nonce
 
-    firstMessage.Substring(0, 3) |> should equal expectedFirstMessage
+    firstMessage.Substring 3 |> should equal expectedFirstMessage
 
 [<Fact>]
 let ``a client final message should contain in order, a channel binding, nonce and client proof``() =

@@ -15,7 +15,7 @@ let testSets = !! "test/**/*.fsproj"
 // Clean targets
 
 Target "Clean" (fun _ -> 
-    CleanDirs[buildDirectory]
+    CleanDirs[buildDirectory; reportsDirectory]
 )
 
 // ------------------------------------------------------------------------------------------

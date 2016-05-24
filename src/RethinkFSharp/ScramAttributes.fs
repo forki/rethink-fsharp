@@ -29,7 +29,14 @@ type internal ScramAttributes =
 
 module internal Scram =
     let internal clientFirstMessage scramAttributes =
-        ""
+        let username = defaultArg scramAttributes.Username ""
+        let nonce = defaultArg scramAttributes.Nonce ""
+
+        sprintf "n,,u=%s,r=%s" username nonce
 
     let internal clientFinalMessage scramAttributes =
-        ""
+        let headerAndChannelBinding = defaultArg scramAttributes.HeaderAndChannelBinding ""
+        let nonce = defaultArg scramAttributes.Nonce ""
+        let clientProof = defaultArg scramAttributes.ClientProof ""
+
+        sprintf "c=%s,r=%s,p=%s" headerAndChannelBinding nonce clientProof
