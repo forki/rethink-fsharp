@@ -1,7 +1,7 @@
 init:
   - git config --global core.autocrlf input
 assembly_info:
-  - patch: false
+  patch: false
 build_script:
   - cmd: build.cmd
 test: off
