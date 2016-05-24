@@ -6,7 +6,7 @@ open Fake.Testing.XUnit2
 // Build parameters
 
 let buildDirectory = "./build/"
-let testDirectory = "./test/"
+let reportsDirectory = "./reports/"
 
 let sourceSets = !! "src/**/*.fsproj"
 let testSets = !! "test/**/*.fsproj"
@@ -36,7 +36,7 @@ Target "UnitTests" (fun _ ->
     |> xUnit2 (fun p -> 
         { p with
             ShadowCopy = true;
-            HtmlOutputPath = Some (buildDirectory @@ "test-results.html")
+            HtmlOutputPath = Some (reportsDirectory @@ "test-results.html")
         })
 )
 
