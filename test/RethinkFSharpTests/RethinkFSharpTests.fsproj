@@ -76,6 +76,26 @@
   </Target>
   -->
   <Import Project="..\..\.paket\paket.targets" />
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <None Include="paket.references" />
+    <Compile Include="ScramAttributesTests.fs" />
+    <Content Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\src\RethinkFSharp\RethinkFSharp.fsproj">
+      <Name>RethinkFSharp</Name>
+      <Project>{866cf358-c77b-4587-b654-a83ca56fc02d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2')">
       <ItemGroup>
@@ -208,24 +228,4 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <None Include="paket.references" />
-    <Compile Include="ScramAttributesTests.fs" />
-    <Content Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\src\RethinkFSharp\RethinkFSharp.fsproj">
-      <Name>RethinkFSharp</Name>
-      <Project>{866cf358-c77b-4587-b654-a83ca56fc02d}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

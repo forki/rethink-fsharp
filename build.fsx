@@ -1,5 +1,6 @@
 #r "packages/Build/FAKE/tools/FakeLib.dll"
 open Fake
+open Fake.OpenCoverHelper
 open Fake.Testing.XUnit2
 
 // ------------------------------------------------------------------------------------------
@@ -10,6 +11,10 @@ let reportsDirectory = "./reports/"
 
 let sourceSets = !! "src/**/*.fsproj"
 let testSets = !! "test/**/*.fsproj"
+
+let isAppveyorBuild = environVar "APPVEYOR" <> null
+
+let codeCoverageReport = (reportsDirectory @@ "code-coverage.xml")
 
 // ------------------------------------------------------------------------------------------
 // Clean targets
@@ -31,18 +36,42 @@ Target "BuildTests" (fun _ ->
     |> Log "BuildTests-Output: "
 )
 
-Target "UnitTests" (fun _ ->
-    !! (buildDirectory @@ "*Tests.dll")
-    |> xUnit2 (fun p -> 
+Target "RunUnitTests" (fun _ ->
+    trace "Executing tests and generating code coverage with OpenCover"
+
+    let assembliesToTest = 
+        !! (buildDirectory @@ "*Tests.dll") 
+        |> Seq.toArray 
+        |> String.concat " "
+
+    OpenCover (fun p ->
         { p with
-            ShadowCopy = true;
-            HtmlOutputPath = Some (reportsDirectory @@ "test-results.html")
+            ExePath = "./packages/build/OpenCover/tools/OpenCover.Console.exe"
+            WorkingDir = __SOURCE_DIRECTORY__
+            TestRunnerExePath = "./packages/build/xunit.runner.console/tools/xunit.console.exe"
+            Output = codeCoverageReport
+            Register = RegisterType.RegisterUser
+            Filter = "+[RethinkFSharp*]* -[*.Tests*]*"
         })
+        (assembliesToTest + " -appveyor -noshadow")
+)
+
+Target "PublishCodeCoverage" (fun _ ->
+    trace "Publishing code coverage report to CodeCov"
+
+    Shell.Exec(@"SET PATH=C:\Python34;C:\Python34\Scripts;%PATH%") |> ignore
+
+    Shell.Exec("pip install codecov") |> ignore
+
+    Shell.Exec("codecov -f " + codeCoverageReport) |> ignore
 )
 
 "Clean"
     ==> "Build"
     ==> "BuildTests"
-    ==> "UnitTests"
+    ==> "RunUnitTests"
 
-RunTargetOrDefault "UnitTests"
+"RunUnitTests"
+    =?> ("PublishCodeCoverage", isAppveyorBuild)
+
+RunTargetOrDefault "RunUnitTests"

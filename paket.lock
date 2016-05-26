@@ -2,12 +2,13 @@
 GITHUB
   remote: rethinkdb/rethinkdb
   specs:
-    src/rdb_protocol/ql2.proto (c38d34a746b2d6618eb6a71692ecbd254d940072)
+    src/rdb_protocol/ql2.proto (1b2230f889b69eb0d4b47ccddef065bfda2086af)
 GROUP Build
 NUGET
   remote: https://www.nuget.org/api/v2
   specs:
     FAKE (4.26)
+    OpenCover (4.6.519)
     xunit.runner.console (2.1)
 
 GROUP Test
