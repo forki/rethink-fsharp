@@ -1,5 +1,10 @@
 init:
   - git config --global core.autocrlf input
+environment:
+  NUGET_TOKEN:
+    secure: CbuhZ1G9f3uqtUI3YGltnT7LvC+0590MyF+4vue/JEqU5k2pSx8Lksvz1vZvkIQ8
+  CODECOV_TOKEN:
+    secure: voc0y3pJLXhynPbai0mG/f+8xXvAHJ2kIk0pXnb/GTyzoNV+oMeDQZ6t9Ak5VEe8
 assembly_info:
   patch: false
 build_script:

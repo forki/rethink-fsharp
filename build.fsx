@@ -74,11 +74,23 @@ Target "RunUnitTests" (fun _ ->
 Target "PublishCodeCoverage" (fun _ ->
     trace "Publishing code coverage report to CodeCov..."
 
-    Shell.Exec(@"SET PATH=C:\Python34;C:\Python34\Scripts;%PATH%") |> ignore
+    let codeCovToken = environVar "CODECOV_TOKEN"
+
+    setEnvironVar "PATH" @"C:\Python34;C:\Python34\Scripts;%PATH%"
 
     Shell.Exec("pip install codecov") |> ignore
 
-    Shell.Exec("codecov -f " + codeCoverageReport) |> ignore
+    let exitCode = ExecProcess (fun info -> 
+        info.FileName <- "pip" 
+        info.Arguments <- "install --user codecov") (TimeSpan.FromMinutes 5.0)
+    
+    if exitCode <> 0 then failwithf "Could not download and install the codecov utility"
+
+    let exitCode = ExecProcess (fun info -> 
+        info.FileName <- "codecov"; 
+        info.Arguments <- (sprintf "-f %s -t %s" codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
+
+    if exitCode <> 0 then failwithf "Could not publish the code coverage report to codecov"
 )
 
 // ------------------------------------------------------------------------------------------
@@ -96,6 +108,14 @@ Target "NugetPackage" (fun _ ->
         })
 )
 
+Target "PublishNugetPackage" (fun _ ->
+    trace "Publishing Nuget package with Paket..."
+)
+
+Target "All" (fun _ ->
+    ()
+)
+
 "Clean"
     ==> "PatchAssemblyInfo"
     ==> "Build"
@@ -103,5 +123,6 @@ Target "NugetPackage" (fun _ ->
     ==> "RunUnitTests"
     =?> ("PublishCodeCoverage", isAppveyorBuild)
     ==> "NugetPackage"
+    ==> "All"
 
-RunTargetOrDefault "NugetPackage"
+RunTargetOrDefault "All"
