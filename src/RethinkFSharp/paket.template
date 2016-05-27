@@ -1,0 +1,27 @@
+﻿type file
+id
+	RethinkFSharp
+owners
+	Coda Solutions Ltd
+authors
+	Paul Thomas
+projectUrl
+	https://github.com/ptcoda/rethink-fsharp
+licenseUrl
+	https://github.com/ptcoda/rethink-fsharp/blob/master/LICENSE
+requireLicenseAcceptance
+	false
+copyright
+	Copyright 2016
+tags
+	F# fsharp rethinkdb reql driver
+summary
+	Take advantage of the real time capabilities of RethinkDB in your F# applications. Features full support for the ReQL wire protocol,
+	and has been designed with F# in mind.
+description
+	A RethinkDB client driver with all the functional goodness of F#
+dependencies
+	FSharp.Core >= 3.1.2.5
+files
+	../../build/RethinkFSharp.dll ==> lib/net45
+	../../build/RethinkFSharp.Types.dll ==> lib/net45
