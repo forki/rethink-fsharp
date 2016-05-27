@@ -3,5 +3,8 @@ init:
 assembly_info:
   patch: false
 build_script:
-  - cmd: build.cmd
+  - cmd: .\build.cmd
 test: off
+artifacts:
+  - path: bin\*.nupkg
+

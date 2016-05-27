@@ -1,30 +1,38 @@
 #r "packages/Build/FAKE/tools/FakeLib.dll"
 open Fake
 open Fake.OpenCoverHelper
-open Fake.Testing.XUnit2
+open Fake.ReleaseNotesHelper
+open System
+open System.IO
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
 
 let buildDirectory = "./build/"
 let reportsDirectory = "./reports/"
+let binDirectory = "./bin/"
 
-let sourceSets = !! "src/**/*.fsproj"
-let testSets = !! "test/**/*.fsproj"
-
+// Detect if we are running this build on Appveyor
 let isAppveyorBuild = environVar "APPVEYOR" <> null
 
-let codeCoverageReport = (reportsDirectory @@ "code-coverage.xml")
+// Extract information from the pending release
+let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
 
 // ------------------------------------------------------------------------------------------
 // Clean targets
 
 Target "Clean" (fun _ -> 
-    CleanDirs[buildDirectory; reportsDirectory]
+    CleanDirs[buildDirectory; reportsDirectory; binDirectory]
 )
 
 // ------------------------------------------------------------------------------------------
 // Build and Test targets
+
+let sourceSets = !! "src/**/*.fsproj"
+
+Target "PatchAssemblyInfo" (fun _ ->
+    trace "Patching all assemblies..."
+)
 
 Target "Build" (fun _ ->
     MSBuildRelease buildDirectory "Rebuild" sourceSets
@@ -32,12 +40,19 @@ Target "Build" (fun _ ->
 )
 
 Target "BuildTests" (fun _ ->
+    let testSets = !! "test/**/*.fsproj"
+
     MSBuildDebug buildDirectory "Build" testSets
     |> Log "BuildTests-Output: "
 )
 
+// ------------------------------------------------------------------------------------------
+// Run Unit Tests and generate Code Coverage Report
+
+let codeCoverageReport = (reportsDirectory @@ "code-coverage.xml")
+
 Target "RunUnitTests" (fun _ ->
-    trace "Executing tests and generating code coverage with OpenCover"
+    trace "Executing tests and generating code coverage with OpenCover..."
 
     let assembliesToTest = 
         !! (buildDirectory @@ "*Tests.dll") 
@@ -57,7 +72,7 @@ Target "RunUnitTests" (fun _ ->
 )
 
 Target "PublishCodeCoverage" (fun _ ->
-    trace "Publishing code coverage report to CodeCov"
+    trace "Publishing code coverage report to CodeCov..."
 
     Shell.Exec(@"SET PATH=C:\Python34;C:\Python34\Scripts;%PATH%") |> ignore
 
@@ -66,12 +81,27 @@ Target "PublishCodeCoverage" (fun _ ->
     Shell.Exec("codecov -f " + codeCoverageReport) |> ignore
 )
 
+// ------------------------------------------------------------------------------------------
+// Generate Nuget package and deploy
+
+Target "NugetPackage" (fun _ ->
+    trace "Building Nuget package with Paket..."
+
+    Paket.Pack (fun p -> 
+        { p with
+            OutputPath = binDirectory
+            Symbols = true
+            Version = releaseNotes.NugetVersion
+            ReleaseNotes = releaseNotes.Notes |> String.concat Environment.NewLine
+        })
+)
+
 "Clean"
+    ==> "PatchAssemblyInfo"
     ==> "Build"
     ==> "BuildTests"
     ==> "RunUnitTests"
-
-"RunUnitTests"
     =?> ("PublishCodeCoverage", isAppveyorBuild)
+    ==> "NugetPackage"
 
-RunTargetOrDefault "RunUnitTests"
+RunTargetOrDefault "NugetPackage"
