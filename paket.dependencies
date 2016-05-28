@@ -6,6 +6,7 @@ source https://nuget.org/api/v2
 nuget FAKE
 nuget xUnit.Runner.Console
 nuget OpenCover
+nuget System.Management.Automation
 
 group Test
 source https://nuget.org/api/v2
