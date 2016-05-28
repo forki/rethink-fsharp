@@ -11,6 +11,7 @@ open System.IO
 let buildDirectory = "./build/"
 let reportsDirectory = "./reports/"
 let binDirectory = "./bin/"
+let toolsDirectory = "./tools"
 
 // Detect if we are running this build on Appveyor
 let isAppveyorBuild = environVar "APPVEYOR" <> null
@@ -76,9 +77,7 @@ Target "PublishCodeCoverage" (fun _ ->
 
     let codeCovToken = environVar "CODECOV_TOKEN"
 
-    setEnvironVar "PATH" @"C:\Python34;C:\Python34\Scripts;%PATH%"
-
-    Shell.Exec("pip install codecov") |> ignore
+    setEnvironVar "PATH" "C:\\Python34;C:\\Python34\\Scripts;%PATH%" |> ignore
 
     let exitCode = ExecProcess (fun info -> 
         info.FileName <- "pip" 
@@ -87,8 +86,7 @@ Target "PublishCodeCoverage" (fun _ ->
     if exitCode <> 0 then failwithf "Could not download and install the codecov utility"
 
     let exitCode = ExecProcess (fun info -> 
-        info.FileName <- "codecov"; 
-        info.Arguments <- (sprintf "-f %s -t %s" codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
+        info.FileName <- "codecov") (TimeSpan.FromMinutes 5.0)
 
     if exitCode <> 0 then failwithf "Could not publish the code coverage report to codecov"
 )
@@ -121,7 +119,7 @@ Target "All" (fun _ ->
     ==> "Build"
     ==> "BuildTests"
     ==> "RunUnitTests"
-    =?> ("PublishCodeCoverage", isAppveyorBuild)
+    ==> "PublishCodeCoverage"
     ==> "NugetPackage"
     ==> "All"
 
