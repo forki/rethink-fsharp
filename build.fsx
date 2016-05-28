@@ -25,7 +25,7 @@ let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
 // Clean targets
 
 Target "Clean" (fun _ -> 
-    CleanDirs[buildDirectory; reportsDirectory; binDirectory]
+    CleanDirs[buildDirectory; reportsDirectory; binDirectory; toolsDirectory]
 )
 
 // ------------------------------------------------------------------------------------------
@@ -79,42 +79,22 @@ Target "PublishCodeCoverage" (fun _ ->
 
     let codeCovToken = environVar "CODECOV_TOKEN"
 
-    //let appDataEnv = environVar "APPDATA"
-    //let pathEnv = environVar "PATH"
-    //trace appDataEnv
-    //trace pathEnv
+    // Not long till Windows 10 supports Bash natively :)
+
+    setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;%PATH%"
+
+    let codeCovScript = (toolsDirectory @@ "CodeCov.sh")
 
     PowerShell.Create()
-        .AddScript("(New-Object System.Net.WebClient).DownloadFile(\"https://codecov.io/bash\", \"CodecovUploader.sh\")")
+        .AddScript("(New-Object System.Net.WebClient).DownloadFile(\"https://codecov.io/bash\", \"" + codeCovScript + "\")")
         .Invoke() |> ignore
 
-    PowerShell.Create()
-        .AddScript("./CodecovUploader.sh" + (sprintf "-f %s -t %s" codeCoverageReport codeCovToken))
-        .Invoke() |> ignore
+    let exitCode = ExecProcess (fun info -> 
+        info.FileName <- "bash"
+        info.Arguments <- (sprintf "%s -f %s -t %s" codeCovScript codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
 
-    // Not sure why I need to do this, but codecov executable isn't found on the path otherwise
-//    setEnvironVar "PATH" (appDataEnv + "\\Python\\Scripts;C:\\Python34;C:\\Python34\\Scripts;%PATH%") |> ignore
-//
-//    let exitCode = ExecProcess (fun info ->
-//        info.FileName <- "python"
-//        info.Arguments <- "-m pip install --upgrade pip") (TimeSpan.FromMinutes 5.0)
-//
-//    if exitCode <> 0 then 
-//        failwithf "Could not upgrade the version of pip to the latest"
-//
-//    let exitCode = ExecProcess (fun info -> 
-//        info.FileName <- "pip" 
-//        info.Arguments <- "install --user codecov") (TimeSpan.FromMinutes 5.0)
-//    
-//    if exitCode <> 0 then 
-//        failwithf "Could not download and install the codecov utility"
-//
-//    let exitCode = ExecProcess (fun info -> 
-//        info.FileName <- "codecov"
-//        info.Arguments <- (sprintf "-f %s -t %s" codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
-//
-//    if exitCode <> 0 then 
-//        failwithf "Could not publish the code coverage report to codecov"
+    if exitCode <> 0 then
+        failwithf "Failed to upload the codecov coverage report"
 )
 
 // ------------------------------------------------------------------------------------------
