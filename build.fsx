@@ -15,9 +15,6 @@ let reportsDirectory = "./reports/"
 let binDirectory = "./bin/"
 let toolsDirectory = "./tools"
 
-// Detect if we are running this build on Appveyor
-let isAppveyorBuild = environVar "APPVEYOR" <> null
-
 // Extract information from the pending release
 let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
 
@@ -77,8 +74,6 @@ Target "RunUnitTests" (fun _ ->
 Target "PublishCodeCoverage" (fun _ ->
     trace "Publishing code coverage report to CodeCov..."
 
-    let codeCovToken = environVar "CODECOV_TOKEN"
-
     // Not long till Windows 10 supports Bash natively :)
 
     setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;%PATH%"
@@ -91,7 +86,7 @@ Target "PublishCodeCoverage" (fun _ ->
 
     let exitCode = ExecProcess (fun info -> 
         info.FileName <- "bash"
-        info.Arguments <- (sprintf "%s -f %s -t %s" codeCovScript codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
+        info.Arguments <- (sprintf "%s -f %s" codeCovScript codeCoverageReport)) (TimeSpan.FromMinutes 5.0)
 
     if exitCode <> 0 then
         failwithf "Failed to upload the codecov coverage report"
