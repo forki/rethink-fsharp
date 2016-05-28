@@ -4,6 +4,7 @@ open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
 open System
 open System.IO
+open System.Management
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
@@ -77,18 +78,34 @@ Target "PublishCodeCoverage" (fun _ ->
 
     let codeCovToken = environVar "CODECOV_TOKEN"
 
-    setEnvironVar "PATH" "C:\\Python34;C:\\Python34\\Scripts;%PATH%" |> ignore
+    let appDataEnv = environVar "APPDATA"
+    let pathEnv = environVar "PATH"
+    trace appDataEnv
+    trace pathEnv
+
+    // Not sure why I need to do this, but codecov executable isn't found on the path otherwise
+    setEnvironVar "PATH" (appDataEnv + "\\Python\\Scripts;C:\\Python34;C:\\Python34\\Scripts;%PATH%") |> ignore
+
+    let exitCode = ExecProcess (fun info ->
+        info.FileName <- "python"
+        info.Arguments <- "-m pip install --upgrade pip") (TimeSpan.FromMinutes 5.0)
+
+    if exitCode <> 0 then 
+        failwithf "Could not upgrade the version of pip to the latest"
 
     let exitCode = ExecProcess (fun info -> 
         info.FileName <- "pip" 
         info.Arguments <- "install --user codecov") (TimeSpan.FromMinutes 5.0)
     
-    if exitCode <> 0 then failwithf "Could not download and install the codecov utility"
+    if exitCode <> 0 then 
+        failwithf "Could not download and install the codecov utility"
 
     let exitCode = ExecProcess (fun info -> 
-        info.FileName <- "codecov") (TimeSpan.FromMinutes 5.0)
+        info.FileName <- "codecov"
+        info.Arguments <- (sprintf "-f %s -t %s" codeCoverageReport codeCovToken)) (TimeSpan.FromMinutes 5.0)
 
-    if exitCode <> 0 then failwithf "Could not publish the code coverage report to codecov"
+    if exitCode <> 0 then 
+        failwithf "Could not publish the code coverage report to codecov"
 )
 
 // ------------------------------------------------------------------------------------------
