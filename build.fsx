@@ -4,6 +4,7 @@ open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
 open System
 open System.IO
+open Fake.Git
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
@@ -15,6 +16,9 @@ let toolsDirectory = "./tools"
 
 // Extract information from the pending release
 let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
+
+// Automatically perform a full release from a master branch
+let isRelease = getBranchName __SOURCE_DIRECTORY__ <> "master"
 
 // ------------------------------------------------------------------------------------------
 // Clean targets
@@ -122,9 +126,9 @@ Target "All" DoNothing
     ==> "BuildTests"
     ==> "RunUnitTests"
     ==> "PublishCodeCoverage"
+    =?> ("NugetPackage", isRelease)
+    =?> ("PublishNugetPackage", isRelease)
+    =?> ("GithubRelease", isRelease)
     ==> "All"
-    ==> "NugetPackage"
-    ==> "PublishNugetPackage"
-    ==> "GithubRelease"
 
 RunTargetOrDefault "All"
