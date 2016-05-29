@@ -19,7 +19,7 @@ let toolsDirectory = "./tools"
 let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
 
 // Automatically perform a full release from a master branch
-let isRelease = getBranchName __SOURCE_DIRECTORY__ <> "master"
+let isRelease = getBranchName __SOURCE_DIRECTORY__ = "master"
 
 // ------------------------------------------------------------------------------------------
 // Clean targets
@@ -40,8 +40,10 @@ Target "PatchAssemblyInfo" (fun _ ->
         [ Attribute.Title (projectName)
           Attribute.Product "RethinkFSharp"
           Attribute.Description "A RethinkDB client driver with all the functional goodness of F#"
+          Attribute.Company "Coda Solutions Ltd"
           Attribute.Version releaseNotes.AssemblyVersion
-          Attribute.FileVersion releaseNotes.AssemblyVersion ]
+          Attribute.FileVersion releaseNotes.AssemblyVersion
+          Attribute.InternalsVisibleTo "RethinkFSharpTests" ]
 
     let getProjectDetails projectPath =
         let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
@@ -135,6 +137,14 @@ Target "NugetPackage" (fun _ ->
 
 Target "PublishNugetPackage" (fun _ ->
     trace "Publishing Nuget package with Paket..."
+
+    let nugetApiToken = environVar "NUGET_TOKEN"
+
+    Paket.Push (fun p ->
+        { p with
+            ApiKey = nugetApiToken
+            WorkingDir = binDirectory
+        })
 )
 
 Target "GithubRelease" DoNothing
