@@ -2,9 +2,10 @@
 open Fake
 open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
+open Fake.Git
+open Fake.AssemblyInfoFile
 open System
 open System.IO
-open Fake.Git
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
@@ -34,6 +35,26 @@ let sourceSets = !! "src/**/*.fsproj"
 
 Target "PatchAssemblyInfo" (fun _ ->
     trace "Patching all assemblies..."
+
+    let getAssemblyInfoAttributes projectName =
+        [ Attribute.Title (projectName)
+          Attribute.Product "RethinkFSharp"
+          Attribute.Description "A RethinkDB client driver with all the functional goodness of F#"
+          Attribute.Version releaseNotes.AssemblyVersion
+          Attribute.FileVersion releaseNotes.AssemblyVersion ]
+
+    let getProjectDetails projectPath =
+        let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+        ( projectPath,
+          projectName,
+          System.IO.Path.GetDirectoryName(projectPath),
+          (getAssemblyInfoAttributes projectName)
+        )
+
+    sourceSets
+    |> Seq.map getProjectDetails
+    |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
+        CreateFSharpAssemblyInfo (folderName @@ "AssemblyInfo.fs") attributes)
 )
 
 Target "Build" (fun _ ->
