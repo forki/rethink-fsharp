@@ -1,11 +1,9 @@
 #r "packages/Build/FAKE/tools/FakeLib.dll"
-#r "packages/Build/System.Management.Automation/lib/net45/System.Management.Automation.dll"
 open Fake
 open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
 open System
 open System.IO
-open System.Management.Automation
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
@@ -76,13 +74,16 @@ Target "PublishCodeCoverage" (fun _ ->
 
     // Not long till Windows 10 supports Bash natively :)
 
-    setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;%PATH%"
+    setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;C:\\cygwin;C:\\cygwin\\bin;%PATH%"
 
     let codeCovScript = (toolsDirectory @@ "CodeCov.sh")
 
-    PowerShell.Create()
-        .AddScript("(New-Object System.Net.WebClient).DownloadFile(\"https://codecov.io/bash\", \"" + codeCovScript + "\")")
-        .Invoke() |> ignore
+    let exitCode = ExecProcess (fun info ->
+        info.FileName <- "curl"
+        info.Arguments <- "-s https://codecov.io/bash -o " + codeCovScript) (TimeSpan.FromMinutes 2.0)
+
+    if exitCode <> 0 then
+        failwithf "Could not download the bash uploader from CodeCov.io. Expecting cygwin and curl to be installed"
 
     let exitCode = ExecProcess (fun info -> 
         info.FileName <- "bash"
@@ -111,9 +112,9 @@ Target "PublishNugetPackage" (fun _ ->
     trace "Publishing Nuget package with Paket..."
 )
 
-Target "All" (fun _ ->
-    ()
-)
+Target "GithubRelease" DoNothing
+
+Target "All" DoNothing
 
 "Clean"
     ==> "PatchAssemblyInfo"
@@ -121,7 +122,9 @@ Target "All" (fun _ ->
     ==> "BuildTests"
     ==> "RunUnitTests"
     ==> "PublishCodeCoverage"
-    ==> "NugetPackage"
     ==> "All"
+    ==> "NugetPackage"
+    ==> "PublishNugetPackage"
+    ==> "GithubRelease"
 
 RunTargetOrDefault "All"
