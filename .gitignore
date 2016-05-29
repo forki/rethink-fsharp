@@ -9,3 +9,5 @@ build/
 *.user
 reports/
 tools/
+keys/RethinkFSharp.snk
+keys/secure-file.exe

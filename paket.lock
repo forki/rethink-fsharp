@@ -9,6 +9,7 @@ NUGET
   specs:
     FAKE (4.27)
     OpenCover (4.6.519)
+    secure-file (1.0.31)
     xunit.runner.console (2.1)
 
 GROUP Test
