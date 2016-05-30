@@ -1,9 +1,11 @@
 #r "packages/Build/FAKE/tools/FakeLib.dll"
+#load "paket-files/build/fsharp/FAKE/modules/Octokit/Octokit.fsx"
 open Fake
 open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
 open Fake.Git
 open Fake.AssemblyInfoFile
+open Octokit
 open System
 open System.IO
 
@@ -15,6 +17,10 @@ let reportsDirectory = "./reports/"
 let binDirectory = "./bin/"
 let toolsDirectory = "./tools"
 let keysDirectory = "./keys"
+
+// Project files for building and testing
+let sourceSets = !! "src/**/*.fsproj"
+let testSets = !! "test/**/*.fsproj"
 
 // Extract information from the pending release
 let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
@@ -30,9 +36,7 @@ Target "Clean" (fun _ ->
 )
 
 // ------------------------------------------------------------------------------------------
-// Build and Test targets
-
-let sourceSets = !! "src/**/*.fsproj"
+// Strong name signing and patching
 
 Target "DecryptSigningKey" (fun _ ->
     trace "Decrypt signing key for strong named assemblies..."
@@ -78,16 +82,45 @@ Target "PatchAssemblyInfo" (fun _ ->
         CreateFSharpAssemblyInfo (folderName @@ "AssemblyInfo.fs") attributes)
 )
 
+// ------------------------------------------------------------------------------------------
+// Build and Test targets
+
 Target "Build" (fun _ ->
     MSBuildRelease buildDirectory "Rebuild" sourceSets
     |> Log "Build-Output: "
 )
 
 Target "BuildTests" (fun _ ->
-    let testSets = !! "test/**/*.fsproj"
-
     MSBuildDebug buildDirectory "Build" testSets
     |> Log "BuildTests-Output: "
+)
+
+// ------------------------------------------------------------------------------------------
+// Strong name third party dlls
+
+Target "StrongNameTestDependencies" (fun _ ->
+    trace "Strong name thrid party dlls..."
+
+    // It is important we sign before test compilation. At this point, FSharp.Core will have been copied 
+    // to the build directory already, so we use that as our working directory.
+
+    let strongNameSignerPath = currentDirectory @@ "packages/build/Brutal.Dev.StrongNameSigner/tools/StrongNameSigner.Console.exe"
+    let keyFilePath = currentDirectory @@ "keys" @@ "RethinkFSharp.snk"
+
+    ["packages/test/FsUnit.Xunit/lib/net45/FsUnit.Xunit.dll"] 
+    |> Seq.iter (fun dll ->
+        let dllToSignPath = Path.GetFullPath(dll)
+        
+        trace dllToSignPath
+
+        let exitCode = ExecProcess (fun info -> 
+            info.FileName <- strongNameSignerPath
+            info.Arguments <- (sprintf "-a \"%s\" -k \"%s\"" dllToSignPath keyFilePath)
+            info.WorkingDirectory <- buildDirectory) (TimeSpan.FromMinutes 2.0)
+
+        if exitCode <> 0 then
+            failwithf "Failed to strong name third party dll '%s' with key" <| Path.GetFileName(dll)
+    )
 )
 
 // ------------------------------------------------------------------------------------------
@@ -174,6 +207,7 @@ Target "All" DoNothing
     ==> "DecryptSigningKey"
     ==> "PatchAssemblyInfo"
     ==> "Build"
+    ==> "StrongNameTestDependencies"
     ==> "BuildTests"
     ==> "RunUnitTests"
     ==> "PublishCodeCoverage"

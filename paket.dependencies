@@ -7,6 +7,9 @@ nuget FAKE
 nuget xUnit.Runner.Console
 nuget OpenCover
 nuget secure-file
+nuget Brutal.Dev.StrongNameSigner
+
+github fsharp/FAKE modules/Octokit/Octokit.fsx
 
 group Test
 source https://nuget.org/api/v2
