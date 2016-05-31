@@ -1,5 +1,9 @@
 github rethinkdb/rethinkdb:next src/rdb_protocol/ql2.proto
 
+source https://nuget.org/api/v2
+
+nuget BouncyCastle
+
 group Build
 source https://nuget.org/api/v2
 

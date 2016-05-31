@@ -80,6 +80,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="paket.references" />
     <Compile Include="ScramAttributesTests.fs" />
+    <Compile Include="CryptoTests.fs" />
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>

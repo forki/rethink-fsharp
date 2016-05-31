@@ -1,4 +1,7 @@
-
+NUGET
+  remote: https://www.nuget.org/api/v2
+  specs:
+    BouncyCastle (1.8.1)
 GITHUB
   remote: rethinkdb/rethinkdb
   specs:
