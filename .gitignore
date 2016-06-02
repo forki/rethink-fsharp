@@ -11,3 +11,4 @@ reports/
 tools/
 keys/RethinkFSharp.snk
 keys/secure-file.exe
+test/rethinkdb_data/log_file

@@ -1,13 +1,15 @@
-#r "packages/Build/FAKE/tools/FakeLib.dll"
+#r "packages/build/FAKE/tools/FakeLib.dll"
+#r "packages/build/DotNetZip/lib/net20/Ionic.Zip.dll"
 #load "paket-files/build/fsharp/FAKE/modules/Octokit/Octokit.fsx"
+open System
+open System.IO
 open Fake
 open Fake.OpenCoverHelper
 open Fake.ReleaseNotesHelper
 open Fake.Git
 open Fake.AssemblyInfoFile
+open Ionic.Zip
 open Octokit
-open System
-open System.IO
 
 // ------------------------------------------------------------------------------------------
 // Build parameters
@@ -27,6 +29,10 @@ let releaseNotes = parseReleaseNotes (File.ReadAllLines "RELEASE_NOTES.md")
 
 // Automatically perform a full release from a master branch
 let isRelease = getBranchName __SOURCE_DIRECTORY__ = "master"
+
+// Not long till Windows 10 supports Bash natively :)
+
+setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;C:\\cygwin;C:\\cygwin\\bin;%PATH%"
 
 // ------------------------------------------------------------------------------------------
 // Clean targets
@@ -99,7 +105,7 @@ Target "BuildTests" (fun _ ->
 // Strong name third party dlls
 
 Target "StrongNameTestDependencies" (fun _ ->
-    trace "Strong name thrid party dlls..."
+    trace "Strong name sign third party dlls..."
 
     // It is important we sign before test compilation. At this point, FSharp.Core will have been copied 
     // to the build directory already, so we use that as our working directory.
@@ -126,6 +132,30 @@ Target "StrongNameTestDependencies" (fun _ ->
 // ------------------------------------------------------------------------------------------
 // Run Unit Tests and generate Code Coverage Report
 
+let rethinkDbProcess = "rethinkdb.exe"
+
+Target "StartRethinkDb" (fun _ ->
+    let zipFile = toolsDirectory @@ "RethinkDb.zip"
+
+    let exitCode = ExecProcess (fun info ->
+        info.FileName <- "curl"
+        info.Arguments <- "https://download.rethinkdb.com/windows/rethinkdb-2.3.3.zip -o " + zipFile) (TimeSpan.FromMinutes 5.0)
+
+    if exitCode <> 0 then failwithf "Unable to download the latest version of RethinkDB for windows"
+
+    let rethinkDbExe = toolsDirectory @@ rethinkDbProcess
+    let rethinkDbDataPath = __SOURCE_DIRECTORY__ @@ "test" @@ "rethinkdb_data"
+
+    use zip = new ZipFile(zipFile)
+    zip.FlattenFoldersOnExtract <- true
+    zip.ExtractAll toolsDirectory
+    
+    trace "Attempting to start the RethinkDB server..."
+    fireAndForget(fun ps ->
+        ps.FileName <- rethinkDbExe
+        ps.Arguments <- "-d " + rethinkDbDataPath)
+)
+
 let codeCoverageReport = (reportsDirectory @@ "code-coverage.xml")
 
 Target "RunUnitTests" (fun _ ->
@@ -148,12 +178,13 @@ Target "RunUnitTests" (fun _ ->
         (assembliesToTest + " -appveyor -noshadow")
 )
 
+Target "ShutdownRethinkDb" (fun _ ->
+    trace "Attempting to shutdown the RethinkDB server..."
+    killProcess rethinkDbProcess
+)
+
 Target "PublishCodeCoverage" (fun _ ->
     trace "Publishing code coverage report to CodeCov..."
-
-    // Not long till Windows 10 supports Bash natively :)
-
-    setEnvironVar "PATH" "C:\\cygwin64;C:\\cygwin64\\bin;C:\\cygwin;C:\\cygwin\\bin;%PATH%"
 
     let codeCovScript = (toolsDirectory @@ "CodeCov.sh")
 
@@ -209,7 +240,9 @@ Target "All" DoNothing
     ==> "Build"
     ==> "StrongNameTestDependencies"
     ==> "BuildTests"
+    ==> "StartRethinkDb"
     ==> "RunUnitTests"
+    ==> "ShutdownRethinkDb"
     ==> "PublishCodeCoverage"
     =?> ("NugetPackage", isRelease)
     =?> ("PublishNugetPackage", isRelease)

@@ -12,6 +12,7 @@ nuget xUnit.Runner.Console
 nuget OpenCover
 nuget secure-file
 nuget Brutal.Dev.StrongNameSigner
+nuget DotNetZip
 
 github fsharp/FAKE modules/Octokit/Octokit.fsx
 

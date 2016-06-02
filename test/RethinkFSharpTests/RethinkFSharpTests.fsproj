@@ -81,6 +81,7 @@
     <None Include="paket.references" />
     <Compile Include="ScramAttributesTests.fs" />
     <Compile Include="CryptoTests.fs" />
+    <Compile Include="HandshakeTests.fs" />
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>

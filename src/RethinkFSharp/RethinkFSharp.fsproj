@@ -61,6 +61,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ScramAttributes.fs" />
     <Compile Include="Crypto.fs" />
+    <Compile Include="Handshake.fs" />
     <None Include="paket.template" />
     <None Include="paket.references" />
   </ItemGroup>
